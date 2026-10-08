@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phone Tracker - Live Web Dashboard</title>
+  
+  <!-- Google Fonts & Leaflet CSS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --primary: #6366f1;
+      --accent: #38bdf8;
+      --emerald: #10b981;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--card-border);
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #6366f1, #38bdf8);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .brand h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .status-pill {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--emerald);
+      color: var(--emerald);
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      background: var(--emerald);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .main-container {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 65px);
+    }
+
+    #sidebar {
+      width: 360px;
+      background: var(--card-bg);
+      border-right: 1px solid var(--card-border);
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sidebar-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .device-card {
+      background: #111827;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .device-card:hover, .device-card.selected {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .device-name {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .device-user {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      margin-bottom: 6px;
+    }
+
+    .metric-label {
+      color: var(--text-muted);
+    }
+
+    .metric-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    #map {
+      flex: 1;
+      height: 100%;
+      background: #0b0f19;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 10px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column-reverse;
+      }
+      #sidebar {
+        width: 100%;
+        height: 250px;
+        border-right: none;
+        border-top: 1px solid var(--card-border);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">📍</div>
+      <div>
+        <h1>Phone Tracker Web Portal</h1>
+      </div>
+    </div>
+    <div class="status-pill">
+      <div class="pulse"></div>
+      Live Render Sync Active
+    </div>
+  </header>
+
+  <div class="main-container">
+    <div id="sidebar">
+      <div class="sidebar-title">Tracked Devices</div>
+      <div id="devicesList">
+        <div class="empty-state">
+          📡 Waiting for phone location pings…<br>
+          Ensure tracking is active in the Android app.
+        </div>
+      </div>
+    </div>
+    <div id="map"></div>
+  </div>
+
+  <!-- Leaflet Map Script -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    // Initialize map centered at default coordinates
+    const map = L.map('map').setView([20.5937, 78.9629], 5);
+
+    // Dark-styled map tiles via CartoDB
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+      maxZoom: 19
+    }).addTo(map);
+
+    const markers = new Map();
+    const circles = new Map();
+    let selectedDeviceId = null;
+
+    async function fetchDevices() {
+      try {
+        const response = await fetch('/api/devices');
+        const data = await response.json();
+        renderDevices(data.devices || []);
+      } catch (err) {
+        console.error('Error fetching device data:', err);
+      }
+    }
+
+    function renderDevices(devices) {
+      const container = document.getElementById('devicesList');
+
+      if (!devices || devices.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            📡 No devices online yet.<br>
+            Start tracking from your Android phone.
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = '';
+
+      devices.forEach(device => {
+        const card = document.createElement('div');
+        card.className = `device-card ${device.deviceId === selectedDeviceId ? 'selected' : ''}`;
+        
+        const dateStr = new Date(device.timestamp).toLocaleTimeString();
+        const chargingIcon = device.isCharging ? '⚡' : '';
+
+        card.innerHTML = `
+          <div class="device-name">${device.deviceModel}</div>
+          <div class="device-user">${device.userEmail}</div>
+          <div class="metric-row">
+            <span class="metric-label">Coordinates:</span>
+            <span class="metric-val">${device.latitude.toFixed(5)}, ${device.longitude.toFixed(5)}</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Accuracy:</span>
+            <span class="metric-val">±${device.accuracy.toFixed(1)}m</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Battery:</span>
+            <span class="metric-val">${device.batteryLevel}% ${chargingIcon}</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Last Updated:</span>
+            <span class="metric-val">${dateStr}</span>
+          </div>
+        `;
+
+        card.onclick = () => {
+          selectedDeviceId = device.deviceId;
+          map.flyTo([device.latitude, device.longitude], 16, { animate: true });
+          renderDevices(devices);
+        };
+
+        container.appendChild(card);
+
+        // Update or create map marker
+        updateMapMarker(device);
+      });
+    }
+
+    function updateMapMarker(device) {
+      const latLng = [device.latitude, device.longitude];
+
+      const popupHtml = `
+        <div style="font-family: sans-serif; min-width: 180px;">
+          <strong style="color: #6366f1; font-size: 14px;">${device.deviceModel}</strong><br>
+          <small style="color: #64748b;">${device.userEmail}</small>
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 6px 0;">
+          <b>Lat/Lng:</b> ${device.latitude.toFixed(5)}, ${device.longitude.toFixed(5)}<br>
+          <b>Battery:</b> ${device.batteryLevel}% ${device.isCharging ? '⚡' : ''}<br>
+          <b>Speed:</b> ${(device.speed * 3.6).toFixed(1)} km/h<br>
+          <b>Updated:</b> ${new Date(device.timestamp).toLocaleTimeString()}
+        </div>
+      `;
+
+      if (markers.has(device.deviceId)) {
+        const marker = markers.get(device.deviceId);
+        marker.setLatLng(latLng);
+        marker.setPopupContent(popupHtml);
+
+        const circle = circles.get(device.deviceId);
+        if (circle) {
+          circle.setLatLng(latLng);
+          circle.setRadius(device.accuracy || 15);
+        }
+      } else {
+        const marker = L.marker(latLng).addTo(map);
+        marker.bindPopup(popupHtml);
+        markers.set(device.deviceId, marker);
+
+        const circle = L.circle(latLng, {
+          color: '#6366f1',
+          fillColor: '#818cf8',
+          fillOpacity: 0.15,
+          radius: device.accuracy || 15
+        }).addTo(map);
+        circles.set(device.deviceId, circle);
+
+        // First device pan
+        if (markers.size === 1) {
+          map.setView(latLng, 15);
+        }
+      }
+    }
+
+    // Initial fetch and 5-second polling interval
+    fetchDevices();
+    setInterval(fetchDevices, 5000);
+  </script>
+</body>
+</html>

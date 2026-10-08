@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">Phone Tracker</string>
+    <string name="tracking_channel_name">Live Location Tracking</string>
+    <string name="tracking_channel_desc">Shows persistent notification when background location tracking is active.</string>
+    
+    <!-- Login Screen -->
+    <string name="login_title">Phone Tracker</string>
+    <string name="login_subtitle">Real-time Location &amp; Anti-Lost Security</string>
+    <string name="login_with_google">Sign in with Google</string>
+    <string name="signing_in">Signing in, please wait…</string>
+    <string name="login_failed">Sign-in failed. Please check internet connection.</string>
+
+    <!-- Main Dashboard -->
+    <string name="welcome_back">Welcome,</string>
+    <string name="device_status">Device Tracking Status</string>
+    <string name="status_active">LIVE TRACKING ACTIVE</string>
+    <string name="status_stopped">TRACKING STOPPED</string>
+    <string name="btn_start_tracking">Start Tracking</string>
+    <string name="btn_stop_tracking">Stop Tracking</string>
+    <string name="screen_off_note">Tracking runs continuously even when your screen is locked or turned off.</string>
+    
+    <!-- Location Card -->
+    <string name="last_known_location">Last Known Location</string>
+    <string name="latitude_label">Latitude:</string>
+    <string name="longitude_label">Longitude:</string>
+    <string name="accuracy_label">Accuracy:</string>
+    <string name="speed_label">Speed:</string>
+    <string name="last_updated_label">Last Updated:</string>
+    <string name="battery_label">Battery:</string>
+    <string name="view_on_map">Open in Google Maps</string>
+    
+    <!-- Battery Optimization -->
+    <string name="battery_optimization_title">Unrestricted Battery Needed</string>
+    <string name="battery_optimization_desc">To prevent Android from killing tracking when screen is off, please disable battery optimization.</string>
+    <string name="btn_optimize_battery">Disable Battery Optimization</string>
+    <string name="btn_logout">Logout</string>
+
+    <!-- Notification Strings -->
+    <string name="notification_title">Phone Tracker is Running</string>
+    <string name="notification_initial_text">Acquiring live location coordinates…</string>
+</resources>
